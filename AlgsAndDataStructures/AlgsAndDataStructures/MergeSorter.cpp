@@ -1,7 +1,6 @@
 #include "StdAfx.h"
 #include "MergeSorter.h"
 
-#define MAX_INT 99999
 
 MergeSorter::MergeSorter(void)
 {
@@ -14,130 +13,77 @@ MergeSorter::~MergeSorter(void)
 
 double MergeSorter::sort(vector<int> vectorToSort, vector<int> &sortedVector)
 {
-	mergeSort(vectorToSort, 0, vectorToSort.size(), sortedVector);
+	clock_t startTime;
+	clock_t endTime;
 
-	return 0;
+	startTime = clock();
+
+	sortedVector = mergeSort(vectorToSort);
+
+	endTime = clock();
+
+	printResults(MERGE_SORT, sortedVector);
+
+	return difftime(endTime, startTime) / (double)CLOCKS_PER_SEC;
 }
 
-void MergeSorter::merge(vector<int> vectorToSort, int leftIndex, int centerIndex, int rightIndex, vector<int> &sortedVector)
+vector<int> MergeSorter::merge(vector<int> leftSubVector, vector<int> rightSubVector)
 {
-	if(leftIndex < 0)
-	{
-		printf("[ERR] leftIndex < 0");
-		return;
-	}
-	else if(leftIndex > vectorToSort.size())
-	{
-		printf("[ERR] leftIndex > vectorToSort.size()");
-		return;
-	}
-	else if(centerIndex > vectorToSort.size())
-	{
-		printf("[ERR] centerIndex > vectorToSort.size()");
-		return;
-	}
-	else if(centerIndex < 0)
-	{
-		printf("[ERR] centerIndex < 0");
-		return;
-	}
-	else if(rightIndex > vectorToSort.size())
-	{
-		printf("[ERR] rightIndex > vectorToSort.size()");
-		return;
-	}
-	else if(rightIndex < 0)
-	{
-		printf("[ERR] rightIndex < 0");
-		return;
-	}
-	else if(vectorToSort.size() < 1)
-	{
-		printf("[ERR] vectorToSort.size() < 1");
-		return;
-	}
+	vector<int> resultVector;
 
+	vector<int>::iterator leftIt = leftSubVector.begin();
+	vector<int>::iterator rightIt = rightSubVector.begin();
 
-	int lengthOfLeftSubArray = centerIndex - leftIndex + 1;
-	int lengthOfRightSubArray = rightIndex - centerIndex;
-
-	printf("leftIndex: %i\n", leftIndex);
-	printf("centerIndex: %i\n", centerIndex);
-	printf("rightIndex: %i\n", rightIndex);
-	printf("lengthOfLeftSubArray: %i\n", lengthOfLeftSubArray);
-	printf("lengthOfRightSubArray: %i\n", lengthOfRightSubArray);
-
-	vector<int> leftSubVector;
-	vector<int> rightSubVector;
-	
-	// Populate the left and right vectors
-	for(int i = 0; i < lengthOfLeftSubArray; i++)
+	// Sort the two vectors until one of the vectors run out of data to sort
+	while (leftIt != leftSubVector.end() && rightIt != rightSubVector.end())
 	{
-		leftSubVector.push_back(vectorToSort[leftIndex + i]);
-	}
-	for(int i = 0; i < lengthOfRightSubArray; i++)
-	{
-		rightSubVector.push_back(vectorToSort[centerIndex + 1 + i]);
-	}
-
-	////////////////////////////////////////////////////////////
-	////////////////////////////////////////////////////////////
-	
-	printf("vectorToSort: ");
-	for(int i = 0; i < vectorToSort.size(); i++)
-	{
-		printf("%i ", vectorToSort[i]);
-	}
-	printf("\n");
-	printf("leftSubVector: ");
-	for(int i = 0; i < leftSubVector.size(); i++)
-	{
-		printf("%i ", leftSubVector[i]);
-	}
-	printf("\n");
-	printf("rightubVector: ");
-	for(int i = 0; i < rightSubVector.size(); i++)
-	{
-		printf("%i ", rightSubVector[i]);
-	}
-	printf("\n");
-	////////////////////////////////////////////////////////////
-	////////////////////////////////////////////////////////////
-	leftSubVector.push_back(MAX_INT);
-	rightSubVector.push_back(MAX_INT);
-
-	int currentLeftSubVectorIndex = 0;
-	int currentRightSubVectorIndex = 0;
-	for(int currentPrimaryVectorIndex = leftIndex; currentPrimaryVectorIndex < rightIndex; currentPrimaryVectorIndex++)
-	{
-		if(leftSubVector[currentLeftSubVectorIndex] <= rightSubVector[currentRightSubVectorIndex])
+		if (*leftIt < *rightIt)
 		{
-			vectorToSort[currentPrimaryVectorIndex] = leftSubVector[currentLeftSubVectorIndex];
-			currentLeftSubVectorIndex++;
+			resultVector.push_back(*leftIt);
+			leftIt++;
 		}
 		else
 		{
-			vectorToSort[currentPrimaryVectorIndex] = rightSubVector[currentRightSubVectorIndex];
-			currentRightSubVectorIndex++;
+			resultVector.push_back(*rightIt);
+			rightIt++;
 		}
 	}
 
-	sortedVector = vectorToSort;
-	for(int i = 0; i < sortedVector.size(); i++)
+	// Toss any leftovers into the resultant (nothing to compare to)
+	while (leftIt != leftSubVector.end())
 	{
-		printf("%i ", sortedVector[i]);
+		resultVector.push_back(*leftIt);
+		leftIt++;
 	}
-	printf("\n\n");
+	while (rightIt != rightSubVector.end())
+	{
+		resultVector.push_back(*rightIt);
+		rightIt++;
+	}
+
+	return resultVector;
 }
 
-void MergeSorter::mergeSort(vector<int> vectorToSort, int leftIndex, int rightIndex, vector<int> &sortedVector)
+vector<int> MergeSorter::mergeSort(vector<int> vectorToSort)
 {
-	if(leftIndex < rightIndex)
+	// Trivial case
+	if (vectorToSort.size() <= 1)
 	{
-		int centerIndex = (leftIndex + rightIndex) / 2;
-		printf("centerIndex: %i\n", centerIndex);
-		mergeSort(vectorToSort, leftIndex, centerIndex, sortedVector);
-		mergeSort(vectorToSort, centerIndex + 1, rightIndex, sortedVector);
-		merge(vectorToSort, leftIndex, centerIndex, rightIndex, sortedVector);
+		return vectorToSort;
 	}
+
+	// Determine middle position of the data set
+	vector<int>::iterator middleIt = vectorToSort.begin() + (vectorToSort.size() / 2);
+
+	// Split data into two vectors
+	vector<int> leftSubVector(vectorToSort.begin(), middleIt);
+	vector<int> rightSubVector(middleIt, vectorToSort.end());
+
+	// Recursive merge sort of the two vectors
+	leftSubVector = mergeSort(leftSubVector);
+	rightSubVector = mergeSort(rightSubVector);
+
+	// Merge sorted reults
+	return merge(leftSubVector, rightSubVector);
 }
+

@@ -11,7 +11,7 @@ public:
 	double sort(vector<int>, vector<int> &);
 
 private:
-	void merge(vector<int>, int, int, int, vector<int> &);
-	void mergeSort(vector<int>, int, int, vector<int> &);
+	vector<int> merge(vector<int>, vector<int>);
+	vector<int> mergeSort(vector<int>);
 };
 

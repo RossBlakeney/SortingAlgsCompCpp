@@ -16,23 +16,34 @@ double InsertionSorter::sort(vector<int> vectorToSort, vector<int> &sortedVector
 
 	startTime = clock();
 
+	//printf("un"); printResults(vectorToSort);
+
 	int key = 0;
 	int insertionIndex = 0;
-	for(int keyIndex = 1; keyIndex < vectorToSort.size(); keyIndex++)
+	for (int keyIndex = 1; keyIndex < vectorToSort.size(); keyIndex++)
 	{
+		// Store key value
 		key = vectorToSort[keyIndex];
+
+		// Set initial insertion index
 		insertionIndex = keyIndex - 1;
-		while( insertionIndex >= 0 && vectorToSort[insertionIndex] > key)
+
+		// Shift all preceeding values greater than the key to the right by one to make room for insertion 
+		while (insertionIndex > -1 && vectorToSort[insertionIndex] > key)
 		{
 			vectorToSort[insertionIndex + 1] = vectorToSort[insertionIndex];
-			insertionIndex -= 1;
+			insertionIndex--;
 		}
+
+		// Insert key value
 		vectorToSort[insertionIndex + 1] = key;
 	}
 
+	sortedVector = vectorToSort;
+
 	endTime = clock();
 
-	sortedVector = vectorToSort;
+	printResults(INSERTION_SORT, sortedVector);
 
 	return difftime(endTime, startTime) / (double) CLOCKS_PER_SEC;
 }
